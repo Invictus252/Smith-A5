@@ -16,8 +16,6 @@ app.use(session({ secret: 'happy jungle',
                   saveUninitialized: false, 
                   cookie: { maxAge: 60000 }}))
 
-
-
 app.all('/', function (req, res)
 {
   if (req.session.user == undefined)
@@ -142,8 +140,10 @@ app.all('/listSongs', function(req, res)
 });                  
 app.all('/addSong', function (req, res)
 {
+  if (req.session.user == undefined)
+    writeResult(req, res, {'error' : 'Please login.'});  
   if (req.query.song == undefined)
-    writeResult(req,res, {'error' : "add requires you to enter a song"});
+    writeResult(req,res, {'error' : "addSong requires you to enter a song"});
   else
   {
     var con = mysql.createConnection(conInfo);    
@@ -153,29 +153,54 @@ app.all('/addSong', function (req, res)
         writeResult(req,res, {'error' : err});
       else
       {
-        con.query('INSERT INTO SONG (SONG_NAME,USER_ID) VALUES (?,?)', [req.query.song,req.session.user.result.id], function (err, result, fields) 
+        if(!Array.isArray(req.query.song))
         {
-        if (err) 
-          writeResult(req,res, {'error' : err});
+          con.query('INSERT INTO SONG (SONG_NAME,USER_ID) VALUES (?,?)', [req.query.song,req.session.user.result.id], function (err, result, fields) 
+          {
+          if (err) 
+            writeResult(req,res, {'error' : err});
+          else
+          {
+            con.query("SELECT * FROM SONG WHERE USER_ID =(?) ORDER BY SONG_ID",[req.session.user.result.id],function (err, result, fields) 
+            {
+              if (err) 
+                writeResult(req,res, {'error' : err});
+              else
+                writeResult(req,res, {'result' : result});
+            });
+          }
+          });          
+        }
         else
         {
-          con.query("SELECT * FROM SONG WHERE USER_ID =(?) ORDER BY SONG_ID",[req.session.user.result.id],function (err, result, fields) 
+          for(var x in req.query.song)
           {
+            {
+            con.query('INSERT INTO SONG (SONG_NAME,USER_ID) VALUES (?,?)', [req.query.song[x],req.session.user.result.id], function (err, result, fields) 
+            {
             if (err) 
               writeResult(req,res, {'error' : err});
-            else
-              writeResult(req,res, {'result' : result});
-          });
+            });          
+            }            
+          }
+          con.query("SELECT * FROM SONG WHERE USER_ID =(?) ORDER BY SONG_ID",[req.session.user.result.id],function (err, result, fields) 
+            {
+              if (err) 
+                writeResult(req,res, {'error' : err});
+              else
+                writeResult(req,res, {'result' : result});
+            });
         }
-        });
       }
     });
   }
 });
 app.all('/removeSong', function (req, res)
 {
+  if (req.session.user == undefined)
+    writeResult(req, res, {'error' : 'Please login.'});   
   if (req.query.song == undefined)
-    writeResult(req,res, {'error' : "add requires you to enter a song"});
+    writeResult(req,res, {'error' : "removeSong requires you to enter a song"});
   else
   {
     var con = mysql.createConnection(conInfo);    
@@ -185,7 +210,9 @@ app.all('/removeSong', function (req, res)
         writeResult(req,res, {'error' : err});
       else
       {
-        con.query('DELETE FROM SONG WHERE SONG_NAME = ? AND USER_ID = ?', [req.query.song,req.session.user.result.id], function (err, result, fields) 
+        if(!Array.isArray(req.query.song))
+        {
+          con.query('DELETE FROM SONG WHERE SONG_NAME = ? AND USER_ID = ?', [req.query.song,req.session.user.result.id], function (err, result, fields) 
         {
           if (err) 
             writeResult(req,res, {'error' : err});
@@ -199,7 +226,28 @@ app.all('/removeSong', function (req, res)
                 writeResult(req,res, {'result' : result});
             });
           }
-        });
+        });          
+        }
+        else
+        {
+          for(var x in req.query.song)
+          {
+            {
+            con.query('DELETE FROM SONG WHERE SONG_NAME = ? AND USER_ID = ?', [req.query.song[x],req.session.user.result.id], function (err, result, fields) 
+            {
+            if (err) 
+              writeResult(req,res, {'error' : err});
+            });          
+            }            
+          }
+          con.query("SELECT * FROM SONG WHERE USER_ID =(?) ORDER BY SONG_ID",[req.session.user.result.id],function (err, result, fields) 
+            {
+              if (err) 
+                writeResult(req,res, {'error' : err});
+              else
+                writeResult(req,res, {'result' : result});
+            });
+        }
       }
     });
   }
