@@ -1,3 +1,3 @@
 # Smith-A5
 
-NEEDS: Error checking on login @ addSong <--see listSongs
+NEEDS: Error checking on query['song'] array
