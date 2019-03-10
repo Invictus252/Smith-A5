@@ -1,3 +1,3 @@
 # Smith-A5
 
-NEEDS: Error checking on query['song'] array
+Look into Connection Pooling, proper ASYNC strategy for looking into arrays on the query string
