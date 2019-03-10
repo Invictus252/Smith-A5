@@ -117,7 +117,6 @@ app.all('/logout', function (req, res)
 {
   console.log('@ "/logout"   User is --> ' + JSON.stringify(req.session.user));
   req.session.user = undefined;
-  console.log(req.session.user);
   writeResult(req, res, {'result' : 'Nobody is logged in.'});
 });
 app.all('/listSongs', function(req, res)
