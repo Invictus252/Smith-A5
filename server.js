@@ -63,7 +63,7 @@ app.all('/register', function (req, res)
             else
             {
               req.session.user = {'result' : {'id': result[0].USER_ID, 'email': result[0].USER_EMAIL}};
-              writeResult(req, res, req.session.user);
+              res.redirect('/');
             }
           });
         }
@@ -165,8 +165,6 @@ app.all('/addSong', function (req, res)
           {
           if (err) 
             writeResult(req,res, {'error' : err});
-          else
-            res.redirect('/listSongs');
           });          
         }
         else
@@ -179,8 +177,8 @@ app.all('/addSong', function (req, res)
               writeResult(req,res, {'error' : err});
             });             
           }
-          res.redirect('/listSongs'); 
         }
+         res.redirect('/listSongs'); 
       }
     });
   }
@@ -219,8 +217,8 @@ app.all('/removeSong', function (req, res)
               writeResult(req,res, {'error' : err});
             });             
           }
-          res.redirect('/listSongs');
         }
+         res.redirect('/listSongs');
       }
     });
   }
